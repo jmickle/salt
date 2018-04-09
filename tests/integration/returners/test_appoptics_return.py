@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Tests for the librato returner
+Tests for the AppOptics returner
 '''
 # Import Python libs
 from __future__ import absolute_import, print_function, unicode_literals
@@ -10,7 +10,7 @@ import logging
 from tests.support.case import ShellCase
 
 # Import salt libs
-from salt.returners import librato_return
+from salt.returners import appoptics_return
 
 log = logging.getLogger(__name__)
 
@@ -42,21 +42,21 @@ MOCK_RET_OBJ = {
     "retcode": 2,
     "success": True,
     "fun": "state.highstate",
-    "id": "Librato-Test",
+    "id": "AppOptics-Test",
     "out": "highstate"
 }
 
 
-class libratoTest(ShellCase):
+class AppOpticsTest(ShellCase):
     '''
-    Test the librato returner
+    Test the AppOptics returner
     '''
 
     def test_count_runtimes(self):
         '''
         Test the calculations
         '''
-        results = librato_return._calculate_runtimes(MOCK_RET_OBJ['return'])
+        results = AppOptics_return._calculate_runtimes(MOCK_RET_OBJ['return'])
         self.assertEqual(results['num_failed_states'], 1)
         self.assertEqual(results['num_passed_states'], 1)
         self.assertEqual(results['runtime'], 7.29)

@@ -21,7 +21,7 @@ integration.modules.test_sysmod
 integration.modules.test_test
 integration.modules.test_useradd
 integration.renderers.test_pydsl
-integration.returners.test_librato_return
+integration.returners.test_appoptics_return
 integration.runners.test_fileserver
 integration.runners.test_jobs
 integration.runners.test_salt
