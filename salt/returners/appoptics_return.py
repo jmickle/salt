@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 '''
-Salt returner to return highstate stats to Librato
+Salt returner to return highstate stats to AppOptics Metrics
 
-To enable this returner the minion will need the Librato
+To enable this returner the minion will need the AppOptics Metrics
 client importable on the Python path and the following
 values configured in the minion or master config.
 
-The Librato python client can be found at:
-https://github.com/librato/python-librato
+The AppOptics python client can be found at:
+https://github.com/appoptics/python-appoptics-metrics
 
 .. code-block:: yaml
 
-    librato.email: example@librato.com
-    librato.api_token: abc12345def
+    appoptics.email: example@appoptics.com
+    appoptics.api_token: abc12345def
 
-This return supports multi-dimension metrics for Librato. To enable
+This return supports multi-dimension metrics for AppOptics. To enable
 support for more metrics, the tags JSON object can be modified to include
 other tags.
 
@@ -40,27 +40,27 @@ import salt.returners
 
 # Import third party libs
 try:
-    import librato
-    HAS_LIBRATO = True
+    import appoptics_metrics
+    HAS_APPOPTICS = True
 except ImportError:
-    HAS_LIBRATO = False
+    HAS_APPOPTICS = False
 
 # Define the module's Virtual Name
-__virtualname__ = 'librato'
+__virtualname__ = 'appoptics'
 
 log = logging.getLogger(__name__)
 
 
 def __virtual__():
-    if not HAS_LIBRATO:
-        return False, 'Could not import librato module; ' \
-            'librato python client is not installed.'
+    if not HAS_APPOPTICS:
+        return False, 'Could not import appoptics_metrics module; ' \
+            'appoptics-metrics python client is not installed.'
     return __virtualname__
 
 
 def _get_options(ret=None):
     '''
-    Get the Librato options from salt.
+    Get the appoptics options from salt.
     '''
     attrs = {'email': 'email',
              'api_token': 'api_token',
@@ -73,24 +73,24 @@ def _get_options(ret=None):
                                                    __salt__=__salt__,
                                                    __opts__=__opts__)
 
-    _options['api_url'] = _options.get('api_url', 'metrics-api.librato.com')
+    _options['api_url'] = _options.get('api_url', 'api.appoptics.com')
 
-    log.debug('Retrieved Librato options: %s', _options)
+    log.debug('Retrieved appoptics options: %s', _options)
     return _options
 
 
-def _get_librato(ret=None):
+def _get_appoptics(ret=None):
     '''
-    Return a Librato connection object.
+    Return an appoptics connection object.
     '''
     _options = _get_options(ret)
 
-    conn = librato.connect(
+    conn = appoptics_metrics.connect(
         _options.get('email'),
         _options.get('api_token'),
-        sanitizer=librato.sanitize_metric_name,
+        sanitizer=appoptics_metrics.sanitize_metric_name,
         hostname=_options.get('api_url'))
-    log.info("Connected to librato.")
+    log.info("Connected to appoptics.")
     return conn
 
 
@@ -118,11 +118,11 @@ def _calculate_runtimes(states):
 
 def returner(ret):
     '''
-    Parse the return data and return metrics to Librato.
+    Parse the return data and return metrics to AppOptics.
     '''
-    librato_conn = _get_librato(ret)
+    appoptics_conn = _get_appoptics(ret)
 
-    q = librato_conn.new_queue()
+    q = appoptics_conn.new_queue()
 
     if ret['fun'] == 'state.highstate':
         log.debug('Found returned Highstate data.')
@@ -157,5 +157,5 @@ def returner(ret):
         q.add('saltstack.highstate.total_states', stats[
               'num_failed_states'] + stats['num_passed_states'], tags={'Name': ret['id']})
 
-    log.info('Sending metrics to Librato.')
+    log.info('Sending metrics to appoptics.')
     q.submit()
